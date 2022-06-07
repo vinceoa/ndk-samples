@@ -58,6 +58,7 @@ Java_com_example_hellolibs_MainActivity_stringFromJNI(JNIEnv *env, jobject thiz)
 
     LOGW("about to malloc() 650Mb");
     p = malloc(1048560 * 650);
+    memset(p, 0, 1048560 * 650 );
 
     LOGW("sleeping for 5s");
     sleep(5);
@@ -78,7 +79,7 @@ Java_com_example_hellolibs_MainActivity_stringFromJNI(JNIEnv *env, jobject thiz)
 
 
 
-    for( i=0; i < 2350; i++){
+    for( i=0; i < 12350; i++){
         LOGW("About to malloc() 1Mb loop-count %d", i);
         p = malloc(1048560);
         if( p == NULL ){
@@ -88,8 +89,8 @@ Java_com_example_hellolibs_MainActivity_stringFromJNI(JNIEnv *env, jobject thiz)
 
         }
         memset(p,0,1048560);
-        LOGW("malloc loop: %d Mb - sleeping for 1s", i);
-        sleep(1);
+        LOGW("malloc loop: %d 'th Mb - sleeping for 0.02s", i);
+        usleep(20);
     }
 
     LOGW("after malloc");
