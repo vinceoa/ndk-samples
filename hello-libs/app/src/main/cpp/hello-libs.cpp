@@ -21,9 +21,15 @@
 #include <gmath.h>
 #include <gperf.h>
 #include <string>
+#include <stdlib.h>
 
 #define LOGI(...) \
   ((void)__android_log_print(ANDROID_LOG_INFO, "hello-libs::", __VA_ARGS__))
+
+
+#define LOGW(...) \
+  ((void)__android_log_print(ANDROID_LOG_WARN, "hello2-libs::", __VA_ARGS__))
+
 
 /* This is a trivial JNI example where we use a native method
  * to return a new VM String. See the corresponding Java source
@@ -35,6 +41,8 @@ extern "C" JNIEXPORT jstring JNICALL
 Java_com_example_hellolibs_MainActivity_stringFromJNI(JNIEnv *env, jobject thiz) {
     // Just for simplicity, we do this right away; correct way would do it in
     // another thread...
+
+    void *p = malloc(32);
     auto ticks = GetTicks();
 
     for (auto exp = 0; exp < 32; ++exp) {
@@ -43,7 +51,19 @@ Java_com_example_hellolibs_MainActivity_stringFromJNI(JNIEnv *env, jobject thiz)
     }
     ticks = GetTicks() - ticks;
 
+    int i=5000;
+    LOGW("about to malloc() lots");
+    for( i=0; i < 35000; i++){
+        p = malloc(1048580);
+        memset(p,0,1048560);
+        LOGW("malloc loop: %d Mb", i);
+    }
+
+    LOGW("after malloc");
+
     LOGI("calculation time: %" PRIu64, ticks);
 
-    return env->NewStringUTF("Hello from JNI LIBS!");
+//    p = malloc(32);
+
+    return env->NewStringUTF("Hello from malloc() buster");
 }
