@@ -22,6 +22,9 @@
 #include <gperf.h>
 #include <string>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/errno.h>
+#include <sys/resource.h>
 
 #define LOGI(...) \
   ((void)__android_log_print(ANDROID_LOG_INFO, "hello-libs::", __VA_ARGS__))
@@ -52,11 +55,41 @@ Java_com_example_hellolibs_MainActivity_stringFromJNI(JNIEnv *env, jobject thiz)
     ticks = GetTicks() - ticks;
 
     int i=5000;
-    LOGW("about to malloc() lots");
-    for( i=0; i < 35000; i++){
-        p = malloc(1048580);
+
+    LOGW("about to malloc() 650Mb");
+    p = malloc(1048560 * 650);
+
+    LOGW("sleeping for 5s");
+    sleep(5);
+
+    struct rlimit lim_as, lim_data ;
+
+    if( getrlimit(RLIMIT_AS, &lim_as) != 0 ){
+        LOGW("RLIMIT_AS error %d", errno);
+    }
+
+    LOGW("Rlimit as cur=%ld, max=%ld", lim_as.rlim_cur, lim_as.rlim_max);
+    if(getrlimit(RLIMIT_DATA, &lim_data) != 0 ){
+        LOGW("RLIMIT_DATA error %d", errno);
+
+    }
+
+    LOGW("Rlimit data cur=%ld, max=%ld", lim_data.rlim_cur, lim_data.rlim_max);
+
+
+
+    for( i=0; i < 2350; i++){
+        LOGW("About to malloc() 1Mb loop-count %d", i);
+        p = malloc(1048560);
+        if( p == NULL ){
+            LOGW("errno = %d", errno);
+            LOGW("malloc failed at 650 + %d",i );
+
+
+        }
         memset(p,0,1048560);
-        LOGW("malloc loop: %d Mb", i);
+        LOGW("malloc loop: %d Mb - sleeping for 1s", i);
+        sleep(1);
     }
 
     LOGW("after malloc");
